@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -25,11 +25,13 @@ jobs:
       - name: Generate Nuxt
         run: npm run generate
 
-      - name: Deploy to Beget via FTP
+      - name: Deploy to Beget
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          security: strict
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           local-dir: ./.output/public/
