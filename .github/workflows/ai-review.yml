@@ -24,6 +24,16 @@ jobs:
           # between base and head commits.
           fetch-depth: 0
 
+      - name: Debug — check prompt file exists
+        run: |
+          pwd
+          echo "--- Root listing ---"
+          ls -la
+          echo "--- .ai-review folder ---"
+          ls -la .ai-review/prompts/ || echo "FOLDER NOT FOUND"
+          echo "--- File content ---"
+          cat .ai-review/prompts/lang-ru.md || echo "FILE NOT FOUND"
+
       - name: Run AI Review
         uses: Nikita-Filonov/ai-review@v0.76.0
         env:
@@ -79,7 +89,7 @@ jobs:
 
           # Context around changed lines when a context mode is used.
           REVIEW__CONTEXT_LINES: "10"
-          
+
           # ============================================================
           # Prompts — комментарии на русском языке
           # ============================================================
