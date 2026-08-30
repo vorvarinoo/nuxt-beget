@@ -4,5 +4,17 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     'usebootstrap'
-  ]
+  ],
+
+  app: {
+    head: {
+      title: 'it Proger',
+      meta: [
+        { name: 'charset', content: 'utf-8'}
+      ]
+      // link: [
+      //   {rel: 'stylesheet', href: 'css'}
+      // ]
+    }
+  }
 })
