@@ -79,6 +79,13 @@ jobs:
 
           # Context around changed lines when a context mode is used.
           REVIEW__CONTEXT_LINES: "10"
+          
+          # ============================================================
+          # Prompts — комментарии на русском языке
+          # ============================================================
+
+          PROMPT__SYSTEM_INLINE_PROMPT_FILES: '[".ai-review/prompts/lang-ru.md"]'
+          PROMPT__SYSTEM_SUMMARY_PROMPT_FILES: '[".ai-review/prompts/lang-ru.md"]'
 
           # ============================================================
           # Logging
