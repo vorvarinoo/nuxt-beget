@@ -1,0 +1,91 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    name: AI Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          # Required so ai-review can calculate the diff
+          # between base and head commits.
+          fetch-depth: 0
+
+      - name: Run AI Review
+        uses: Nikita-Filonov/ai-review@v0.76.0
+        env:
+          # ============================================================
+          # LLM — OpenRouter + GLM 5.3 Flash
+          # ============================================================
+
+          LLM__PROVIDER: "OPENROUTER"
+
+          LLM__META__MODEL: "z-ai/glm-5.3-flash"
+          LLM__META__MAX_TOKENS: "15000"
+          LLM__META__TEMPERATURE: "0.2"
+
+          LLM__HTTP_CLIENT__VERIFY: "true"
+          LLM__HTTP_CLIENT__TIMEOUT: "180"
+          LLM__HTTP_CLIENT__API_URL: "https://openrouter.ai/api/v1"
+          LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.OPENROUTER_API_KEY }}
+
+          # ============================================================
+          # GitHub
+          # ============================================================
+
+          VCS__PROVIDER: "GITHUB"
+
+          VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
+          VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
+          VCS__PIPELINE__PULL_NUMBER: ${{ github.event.pull_request.number }}
+
+          VCS__HTTP_CLIENT__VERIFY: "true"
+          VCS__HTTP_CLIENT__TIMEOUT: "120"
+          VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
+          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # ============================================================
+          # Review
+          # ============================================================
+
+          # Review the full changed files, not only individual added lines.
+          REVIEW__MODE: "FULL_FILE_DIFF"
+
+          # Actually publish comments to the PR.
+          REVIEW__DRY_RUN: "false"
+
+          # Maximum number of inline comments per file.
+          REVIEW__MAX_INLINE_COMMENTS: "10"
+
+          # Maximum number of context comments per PR.
+          REVIEW__MAX_CONTEXT_COMMENTS: "30"
+
+          # If an inline comment cannot be attached to a line,
+          # fall back to a summary comment.
+          REVIEW__INLINE_COMMENT_FALLBACK: "true"
+
+          # Context around changed lines when a context mode is used.
+          REVIEW__CONTEXT_LINES: "10"
+
+          # ============================================================
+          # Logging
+          # ============================================================
+
+          LOGGER__LEVEL: "INFO"
+
+        with:
+          # Full review = inline review + summary review.
+          review-command: "run"
