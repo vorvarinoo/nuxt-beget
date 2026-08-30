@@ -20,25 +20,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          # Required so ai-review can calculate the diff
-          # between base and head commits.
           fetch-depth: 0
 
-      - name: Debug — check prompt file exists
+      - name: Check Russian prompt
+        shell: bash
         run: |
-          pwd
-          echo "--- Root listing ---"
-          ls -la
-          echo "--- .ai-review folder ---"
-          ls -la .ai-review/prompts/ || echo "FOLDER NOT FOUND"
-          echo "--- File content ---"
-          cat .ai-review/prompts/lang-ru.md || echo "FILE NOT FOUND"
+          set -e
+
+          PROMPT_FILE="${GITHUB_WORKSPACE}/lang-ru.md"
+
+          echo "Workspace: ${GITHUB_WORKSPACE}"
+          echo "Prompt: ${PROMPT_FILE}"
+
+          if [ ! -f "${PROMPT_FILE}" ]; then
+            echo "::error::lang-ru.md not found: ${PROMPT_FILE}"
+            exit 1
+          fi
+
+          echo "Prompt file found:"
+          ls -lah "${PROMPT_FILE}"
 
       - name: Run AI Review
         uses: Nikita-Filonov/ai-review@v0.76.0
+
         env:
           # ============================================================
-          # LLM — OpenRouter + GLM 5.3 Flash
+          # LLM — OpenRouter
           # ============================================================
 
           LLM__PROVIDER: "OPENROUTER"
@@ -71,31 +78,30 @@ jobs:
           # Review
           # ============================================================
 
-          # Review the full changed files, not only individual added lines.
           REVIEW__MODE: "FULL_FILE_DIFF"
 
-          # Actually publish comments to the PR.
           REVIEW__DRY_RUN: "false"
 
-          # Maximum number of inline comments per file.
           REVIEW__MAX_INLINE_COMMENTS: "10"
 
-          # Maximum number of context comments per PR.
           REVIEW__MAX_CONTEXT_COMMENTS: "30"
 
-          # If an inline comment cannot be attached to a line,
-          # fall back to a summary comment.
           REVIEW__INLINE_COMMENT_FALLBACK: "true"
 
-          # Context around changed lines when a context mode is used.
           REVIEW__CONTEXT_LINES: "10"
 
           # ============================================================
-          # Prompts — комментарии на русском языке
+          # Russian language prompt
           # ============================================================
 
-          PROMPT__SYSTEM_INLINE_PROMPT_FILES: '["${{ github.workspace }}/.ai-review/prompts/lang-ru.md"]'
-          PROMPT__SYSTEM_SUMMARY_PROMPT_FILES: '["${{ github.workspace }}/.ai-review/prompts/lang-ru.md"]'
+          PROMPT__INLINE_PROMPT_FILES: '["./lang-ru.md"]'
+
+          PROMPT__SUMMARY_PROMPT_FILES: '["./lang-ru.md"]'
+
+          # Keep the built-in system prompts.
+          # They define the required response format.
+          PROMPT__INCLUDE_INLINE_SYSTEM_PROMPTS: "true"
+          PROMPT__INCLUDE_SUMMARY_SYSTEM_PROMPTS: "true"
 
           # ============================================================
           # Logging
@@ -104,5 +110,4 @@ jobs:
           LOGGER__LEVEL: "INFO"
 
         with:
-          # Full review = inline review + summary review.
           review-command: "run"
