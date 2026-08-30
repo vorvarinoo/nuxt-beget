@@ -1,5 +1,7 @@
 <script>
-
+definePageMeta({
+  layout: "users",
+});
 </script>
 
 <template>
@@ -9,5 +11,7 @@
 </template>
 
 <style>
-h1 {color: red;}
+h1 {
+  color: red;
+}
 </style>

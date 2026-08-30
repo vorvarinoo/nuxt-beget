@@ -1,27 +1,24 @@
-
-<script>
-
+<script setup>
+const { data } = await useFetch('/api/example', {
+  method: 'post',
+  body: {
+    name: 'Alex',
+    id: 1
+  }
+})
 </script>
 
 <template>
   <div>
-    <header>
-        <ul>
-            <li>
-                <nuxt-link to="/">Главная</nuxt-link>
-            </li>
-            <li>
-                <nuxt-link to="/contact">Контакты</nuxt-link>
-            </li>
-            <li>
-                <nuxt-link to="/users/">Пользователи</nuxt-link>
-            </li>
-        </ul>
-    </header>
     <h1>Home page</h1>
+    <Alert color="primary"> 
+      {{ data.mess }}
+    </Alert>
   </div>
 </template>
 
 <style>
-h1 {color: red;}
+h1 {
+  color: red;
+}
 </style>
